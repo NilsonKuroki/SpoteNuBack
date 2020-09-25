@@ -1,5 +1,5 @@
 import {UserDatabase} from "../data/UserDatabase"
-import {type} from "../model/User"
+import {User, UserType, allBandsOutputDTO, bandOutputDTO} from "../model/User"
 
 export class UserBusiness {
     private userDatabase = new UserDatabase()
@@ -10,8 +10,8 @@ export class UserBusiness {
         nickname: string, 
         email: string, 
         password: string,
-        type: type
-    ){
+        type: UserType
+    ):Promise<void>{
         await this.userDatabase.signupNotPayingListener(
             id, name, nickname, email, password, type
         )
@@ -24,8 +24,8 @@ export class UserBusiness {
         nickname: string, 
         email: string, 
         password: string,
-        type: type
-    ){
+        type: UserType
+    ):Promise<void>{
         await this.userDatabase.signupAdmin(
             id, name, nickname, email, password, type
         )
@@ -37,32 +37,39 @@ export class UserBusiness {
         nickname: string,
         email: string,
         password: string,
-        type: type,
+        type: UserType,
         description: string,
         band_approved: number
-    ){
+    ):Promise<void>{
         await this.userDatabase.signupBand(
             id, name, nickname, email, password, type, description, band_approved
         )
     }
 
-    public async approveBand(id:string){
+    public async approveBand(id:string):Promise<void>{
         await this.userDatabase.approveBand(id)
     }
 
-    public async allBands(){
+    public async allBands():Promise<allBandsOutputDTO[]>{
         return await this.userDatabase.allBands()
     }
 
     public async getBandById(
         id: string
-    ){
+    ):Promise<bandOutputDTO>{
         return await this.userDatabase.getBandById(id)
     }
 
-    public async getUserByNameOrNickname(
+    public async getUserByEmailOrNickname(
         login:string
-        ){
-        return await this.userDatabase.getUserByNameOrNickname(login)
+        ):Promise<User>{
+        const user = await this.userDatabase.getUserByEmailOrNickname(login)
+        return user
+    }
+
+    public async userOnline(
+        id: string
+        ): Promise<User>{
+        return await this.userDatabase.userOnline(id)
     }
 }

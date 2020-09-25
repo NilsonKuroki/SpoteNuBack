@@ -5,7 +5,7 @@ export class User{
         private nickname: string,
         private email: string,
         private password: string,
-        private type: type,
+        private type: UserType,
         private description?: string,
         private band_approved?: string
     ){}
@@ -25,8 +25,31 @@ export class User{
     getPassword():string{
         return this.password
     }
-    getType():string{
+
+    getType(): string{
         return this.type
+    }
+    convertUserRoleToString(type: UserType):string{
+        if(type === UserType.not_paying_listener){
+            return "not_paying_listener"
+        }else if(type === UserType.paying_listener){
+            return "paying_listener"
+        }else if(type === UserType.admin){
+            return "admin"
+        }else{
+            return "band"
+        }
+    }
+    convertStringToUserType(type: string): UserType{
+        if(type === "not_paying_listener"){
+            return UserType.not_paying_listener
+        }else if(type === "paying_listener"){
+            return UserType.paying_listener
+        }else if(type === "admin"){
+            return UserType.admin
+        }else{
+            return UserType.band
+        }
     }
     getdescription():string{
         return this.description
@@ -59,9 +82,35 @@ export class User{
 
 }
 
-export enum type {
+export interface allBandsOutputDTO{
+    id: string,
+    name: string,
+    nickname: string,
+    email: string,
+    type: UserType
+}
+
+export interface bandOutputDTO{
+    id: string,
+    name: string,
+    nickname: string,
+    email: string,
+    description: string,
+    band_approved: number
+}
+
+export interface userOnlineOutputDTO {
+    id: string,
+    name: string,
+    nickname:string,
+    email: string,
+    type: string
+}
+
+export enum UserType {
     band = "band",
     paying_listener = "paying_listener",
     not_paying_listener = "not_paying_listener",
     admin = "admin"
 }
+

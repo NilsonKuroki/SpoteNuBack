@@ -1,6 +1,6 @@
 import { BaseDatabase } from "./BaseDatabase";
-import {type} from "../model/User"
-
+import {User, UserType, allBandsOutputDTO, bandOutputDTO} from "../model/User"
+import { NotFoundError } from '../errors/notFoundError'
 
 export class UserDatabase extends BaseDatabase{
     tableName: string ="Spotinu_Users"
@@ -11,8 +11,8 @@ export class UserDatabase extends BaseDatabase{
         nickname: string, 
         email: string, 
         password: string,
-        type: type
-        ){
+        type: UserType
+        ): Promise<void>{
         try {
             await super.getConnection().raw(`
                 INSERT INTO ${this.tableName}(id, name, nickname, email, password, type)
@@ -36,8 +36,8 @@ export class UserDatabase extends BaseDatabase{
         nickname: string,
         email:string,
         password: string,
-        type: type
-    ){
+        type: UserType
+    ): Promise<void>{
         try {
             await this.getConnection().raw(`
                 INSERT INTO ${this.tableName}(id, name, nickname, email, password, type)
@@ -62,10 +62,10 @@ export class UserDatabase extends BaseDatabase{
         nickname: string,
         email: string,
         password: string,
-        type: type,
+        type: UserType,
         description: string,
         band_approved: number
-    ){
+    ): Promise<void>{
         try {
             await this.getConnection().raw(`
                     INSERT INTO ${this.tableName}(id, name, nickname, email, password, type, description, band_approved)
@@ -85,7 +85,7 @@ export class UserDatabase extends BaseDatabase{
         }
     }
 
-    public async approveBand(id: string){
+    public async approveBand(id: string):Promise<void>{
         await this.getConnection()
         .raw(`
             UPDATE ${this.tableName} 
@@ -94,43 +94,88 @@ export class UserDatabase extends BaseDatabase{
         `)
     }
 
-    public async allBands(){
+    public async allBands(): Promise<allBandsOutputDTO[]>{
         try {
             const results = await this.getConnection()
             .select("id", "name", "nickname", "email", "band_approved")
             .from(this.tableName)
             .where({type: "band"})
 
-            return results[0]
+            return results
         } catch (error) {
             throw new Error(error.message)
         }
     }
 
-    public async getBandById(id: string){
+    public async getBandById(id: string):Promise<bandOutputDTO>{
         try {
-            const result= await this.getConnection()
+            const result = await this.getConnection()
             .select("id", "name", "nickname", "email", "description", "band_approved")
             .from(this.tableName)
             .where({id})
 
-            return result[0]
+            const data= result[0]
+            const band: bandOutputDTO = {
+                id: data.id,
+                name: data.name,
+                nickname: data.nickname,
+                email: data.email,
+                description: data.description,
+                band_approved: data.band_approved
+            }
+
+            return band
         } catch (error) {
             throw new Error (error)
         }
     }
 
-    public async getUserByNameOrNickname(login: string): Promise<any> {
+    public async getUserByEmailOrNickname(login: string): Promise<User> {
         try {
             const result = await this.getConnection()
             .select("*")
             .from(this.tableName)
-            .where({name: login})
+            .where({email: login})
             .orWhere({nickname: login})
+            
+            const data = result[0]
 
-            return result[0]
+            const user = new User(
+                data.id, 
+                data.name, 
+                data.nickname, 
+                data.email, 
+                data.password, 
+                data.type)
+
+            return user
+
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+
+    public async userOnline(id: string):Promise<User>{
+        try {
+            const result = await this.getConnection()
+            .select("*")
+            .from(this.tableName)
+            .where({id: id})
+            //gera um objeto do tipo user, com senha e tudo
+
+            const data = result[0]
+            const user = new User(
+                data.id, 
+                data.name, 
+                data.nickname, 
+                data.email, 
+                data.password, 
+                data.type)
+
+            return user
         } catch (error) {
             throw new Error(error)
         }
     }
 }
+

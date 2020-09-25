@@ -11,5 +11,4 @@ user.post("/signup-band", userController.signupBand)
 user.get("/admin/get-all-bands", userController.allBands)
 user.post("/admin/approve-band", userController.approveBand)
 user.post("/login", userController.login)
-
-
+user.get("/user-online", userController.userOnline)

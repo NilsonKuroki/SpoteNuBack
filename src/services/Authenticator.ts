@@ -11,7 +11,7 @@ export class Authenticator {
             },
             process.env.JWT_KEY as string,
             {
-                expiresIn: "10min",
+                expiresIn: "30min",
             }
         )
 
@@ -19,7 +19,9 @@ export class Authenticator {
     }
 
     public getData(token:string):authenticationData{
-        const payload = jwt.verify(token, process.env.JWT_KEY as string) as any
+        const payload = jwt.verify(
+            token, 
+            process.env.JWT_KEY as string) as any
 
         const result = {
             id: payload.id,
